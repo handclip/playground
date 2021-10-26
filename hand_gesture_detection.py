@@ -22,10 +22,11 @@ def get_video_capture():
 
 def main():
     cap = get_video_capture()
+
     while True:
         _, frame = cap.read()
 
-        if not frame:
+        if frame is None:
             break
 
         x, y, _ = frame.shape
@@ -44,6 +45,7 @@ def main():
                 mpDraw.draw_landmarks(frame, hand_landmarks, mpHands.HAND_CONNECTIONS)
                 prediction = model.predict([landmarks])
                 className = classNames[np.argmax(prediction)]
+                print(f'Found {className} @ {int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)}s')
 
         cv2.putText(frame, className, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
         cv2.imshow("Output", frame)
