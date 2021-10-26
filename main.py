@@ -1,4 +1,4 @@
-import sys
+import argparse
 
 import cv2
 import mediapipe as mp
@@ -13,16 +13,8 @@ model = load_model('mp_hand_gesture')
 classNames = ['okay', 'peace', 'thumbs up', 'thumbs down', 'call me', 'stop', 'rock', 'live long', 'fist', 'smile']
 
 
-def get_video_capture():
-    if len(sys.argv) > 1:
-        return cv2.VideoCapture(sys.argv[1])
-    else:
-        return cv2.VideoCapture(0)
-
-
-def main():
-    cap = get_video_capture()
-
+def start(video_path, show_capture):
+    cap = cv2.VideoCapture(video_path or 0)
     while True:
         _, frame = cap.read()
 
@@ -42,19 +34,32 @@ def main():
                 for landmark in hand_landmarks.landmark:
                     landmarks.append([landmark.x * x, landmark.y * y])
 
-                mpDraw.draw_landmarks(frame, hand_landmarks, mpHands.HAND_CONNECTIONS)
                 prediction = model.predict([landmarks])
                 className = classNames[np.argmax(prediction)]
-                print(f'Found {className} @ {int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)}s')
 
-        cv2.putText(frame, className, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-        cv2.imshow("Output", frame)
+                if show_capture:
+                    mpDraw.draw_landmarks(frame, hand_landmarks, mpHands.HAND_CONNECTIONS)
+                else:
+                    print(f'Found {className} @ {int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)}s')
 
-        if cv2.waitKey(1) == ord('q'):
-            break
+        if show_capture:
+            cv2.putText(frame, className, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            cv2.imshow("Output", frame)
+            if cv2.waitKey(1) == ord('q'):
+                break
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--video-path', help='Path to a video.')
+    parser.add_argument('--show-capture', default=True, action=argparse.BooleanOptionalAction,
+                        help='Whether to display a window of the capture.')
+    args = parser.parse_args()
+
+    start(args.video_path, args.show_capture)
 
 
 if __name__ == '__main__':
