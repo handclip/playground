@@ -1,3 +1,5 @@
+import sys
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -11,10 +13,20 @@ model = load_model('mp_hand_gesture')
 classNames = ['okay', 'peace', 'thumbs up', 'thumbs down', 'call me', 'stop', 'rock', 'live long', 'fist', 'smile']
 
 
+def get_video_capture():
+    if len(sys.argv) > 1:
+        return cv2.VideoCapture(sys.argv[1])
+    else:
+        return cv2.VideoCapture(0)
+
+
 def main():
-    cap = cv2.VideoCapture(0)
+    cap = get_video_capture()
     while True:
         _, frame = cap.read()
+
+        if not frame:
+            break
 
         x, y, _ = frame.shape
         frame = cv2.flip(frame, 1)
