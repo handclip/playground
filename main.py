@@ -28,19 +28,23 @@ def start(video_path, show_capture):
         result = hands.process(framergb)
         className = ''
 
-        if result.multi_hand_landmarks:
-            landmarks = []
-            for hand_landmarks in result.multi_hand_landmarks:
-                for landmark in hand_landmarks.landmark:
-                    landmarks.append([landmark.x * x, landmark.y * y])
+        if not result.multi_hand_landmarks:
+            continue
 
-                prediction = model.predict([landmarks])
-                className = classNames[np.argmax(prediction)]
+        landmarks = []
+        for hand_landmarks in result.multi_hand_landmarks:
+            for landmark in hand_landmarks.landmark:
+                print(f'x: {x}, landmark.x: {landmark.x}')
+                print(f'y: {y}, landmark.y: {landmark.y}')
+                landmarks.append([landmark.x * x, landmark.y * y])
 
-                if show_capture:
-                    mpDraw.draw_landmarks(frame, hand_landmarks, mpHands.HAND_CONNECTIONS)
-                else:
-                    print(f'Found {className} @ {int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)}s')
+            prediction = model.predict([landmarks])
+            className = classNames[np.argmax(prediction)]
+
+            if show_capture:
+                mpDraw.draw_landmarks(frame, hand_landmarks, mpHands.HAND_CONNECTIONS)
+            else:
+                print(f'Found {className} @ {int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)}s')
 
         if show_capture:
             cv2.putText(frame, className, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
