@@ -21,7 +21,7 @@ def start(video_path, show_capture):
         if frame is None:
             break
 
-        frame_x, frame_y, _ = frame.shape
+        frame_width, frame_height, _ = frame.shape
         frame = cv2.flip(frame, 1)
         framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -31,11 +31,8 @@ def start(video_path, show_capture):
         if not result.multi_hand_landmarks:
             continue
 
-        landmarks = []
         for hand_landmarks in result.multi_hand_landmarks:
-            for landmark in hand_landmarks.landmark:
-                landmarks.append([landmark.x * frame_x, landmark.y * frame_y])
-
+            landmarks = [[landmark.x * frame_width, landmark.y * frame_height] for landmark in hand_landmarks.landmark]
             prediction = model.predict([landmarks])
             className = classNames[np.argmax(prediction)]
 
