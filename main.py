@@ -3,31 +3,41 @@ import argparse
 import cv2
 import mediapipe as mp
 
-mpHands = mp.solutions.hands
-hands = mpHands.Hands(max_num_hands=2, min_detection_confidence=0.7)
-mpDraw = mp.solutions.drawing_utils
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands()
+mp_draw = mp.solutions.drawing_utils
+
+
+REQUIRED_HAND_COUNT = 2
+
+
+def is_marked(multi_hand_landmarks):
+    return False
 
 
 def start(video_path):
     cap = cv2.VideoCapture(video_path or 0)
+
+    if not cap.isOpened():
+        print('could not open video')
+        return
+
     while True:
         _, frame = cap.read()
 
         if frame is None:
             break
 
-        frame_width, frame_height, _ = frame.shape
         frame = cv2.flip(frame, 1)
-        framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        result = hands.process(framergb)
-
-        if result.multi_hand_landmarks:
+        result = hands.process(frame_rgb)
+        if result.multi_hand_landmarks and len(result.multi_hand_landmarks) == REQUIRED_HAND_COUNT:
             for hand_landmarks in result.multi_hand_landmarks:
-                landmarks = [[landmark.x * frame_width, landmark.y * frame_height]
-                             for landmark in hand_landmarks.landmark]
-                print(landmarks)
-                mpDraw.draw_landmarks(frame, hand_landmarks, mpHands.HAND_CONNECTIONS)
+                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+            cv2.putText(frame, str(is_marked(result.multi_hand_landmarks)),
+                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         cv2.imshow("Output", frame)
         if cv2.waitKey(1) == ord('q'):
