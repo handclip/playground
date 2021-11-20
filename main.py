@@ -1,7 +1,9 @@
 import argparse
+import pickle
 
 import cv2
 import mediapipe as mp
+import numpy as np
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
@@ -11,8 +13,22 @@ mp_draw = mp.solutions.drawing_utils
 REQUIRED_HAND_COUNT = 2
 
 
+class ModelLabel:
+    OK = 0
+    NOT_OK = 1
+
+
+with open('model.pickle', 'rb') as model_file:
+    model = pickle.load(model_file)
+
+
 def is_marked(multi_hand_landmarks):
-    return False
+    for hand_landmarks in multi_hand_landmarks:
+        hand_landmarks = [(landmark.x, landmark.y, landmark.z) for landmark in hand_landmarks.landmark]
+        flattened_landmarks = np.array(hand_landmarks).flatten()
+        if model.predict([flattened_landmarks]) == ModelLabel.NOT_OK:
+            return False
+    return True
 
 
 def start(video_path):
