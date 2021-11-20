@@ -13,7 +13,7 @@ mp_draw = mp.solutions.drawing_utils
 REQUIRED_HAND_COUNT = 2
 
 
-class ModelLabel:
+class ModelClass:
     OK = 0
     NOT_OK = 1
 
@@ -27,7 +27,7 @@ def is_marked(multi_hand_landmarks):
         hand_landmarks = [(landmark.x, landmark.y, landmark.z)
                           for landmark in hand_landmarks.landmark]
         flattened_landmarks = np.array(hand_landmarks).flatten()
-        if model.predict([flattened_landmarks]) == ModelLabel.NOT_OK:
+        if model.predict([flattened_landmarks]) == ModelClass.NOT_OK:
             return False
     return True
 
