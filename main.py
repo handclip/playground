@@ -67,7 +67,7 @@ def start(video_path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video-path', help='Path to a video.')
+    parser.add_argument('video_path', help='Path to a video.', nargs='?')
     args = parser.parse_args()
 
     start(args.video_path)
