@@ -1,5 +1,5 @@
+import argparse
 import pickle
-import sys
 
 import cv2
 import mediapipe as mp
@@ -66,10 +66,11 @@ def start(video_path):
 
 
 def main():
-    try:
-        start(sys.argv[1])
-    except IndexError:
-        start(None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--video-path', help='Path to a video.')
+    args = parser.parse_args()
+
+    start(args.video_path)
 
 
 if __name__ == '__main__':
